@@ -4,69 +4,104 @@ import { useState, useEffect, useRef } from "react";
 //https://randomuser.me/api/?results=20
 
 export default function App() {
-  const [resultsArray, setResultsArray] = useState([]);
+  // const [resultsArray, setResultsArray] = useState([]);
+  const [locationHeaders, setLocationHeaders] = useState([]);
   const stringData = useRef("");
+
+  //state for people data
+  const [peopleData, setPeopleData] = useState([]);
 
   async function grabData() {
     const response = await fetch("https://randomuser.me/api/?results=20");
     const rawData = await response.json();
     stringData.current = JSON.stringify(rawData, null, 2);
-    setResultsArray(rawData.results);
+    // setResultsArray(rawData.results);
+    return rawData.results;
   }
 
-  let userList = resultsArray.map((person, index) => (
+  function getPeopleTableData(resultsArray) {
+    //results array, each element is a person
+    //for each person we need tr, corresponding td
+    //store it in new state variable? then render new elements
+
+    let peopleData = [];
+    resultsArray.forEach((person) => {
+      const { street, coordinates, timezone, ...restOfKeys } = person.location;
+
+      peopleData.push({
+        PersonName: `${person.name.first} ${person.name.last}`,
+        number: street.number,
+        name: street.name,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        offset: timezone.offset,
+        description: timezone.description,
+        ...restOfKeys
+      });
+    });
+    setPeopleData(peopleData);
+    console.log(peopleData);
+  }
+
+  function flattenLocationHeaders(resultsArray) {
+    //we're going to destructure to get inner keys
+    const {
+      street,
+      coordinates,
+      timezone,
+      ...restOfKeys
+    } = resultsArray[0].location;
+
+    let headersArray = [
+      "PersonName",
+      ...Object.keys(street),
+      ...Object.keys(coordinates),
+      ...Object.keys(timezone),
+      ...Object.keys(restOfKeys)
+    ];
+    setLocationHeaders(headersArray);
+  }
+
+  let headers = locationHeaders.map((header, idx) => (
+    <th key={idx} style={{ border: "1px solid black" }}>
+      {header}
+    </th>
+  ));
+
+  let individualTableData = peopleData?.map((personObj, index) => (
     <tr key={index}>
-      <td>{person.name.first}</td>
-      <td>{person.name.last}</td>
-      <td>
-        {person.location.street.number}
-        {person.location.street.name}
-      </td>
-      <td>{person.location.city}</td>
-      <td>{person.location.state}</td>
-      <td>{person.location.country}</td>
-      <td>{person.location.postcode}</td>
-      <td>
-        {person.location.coordinates.latitude}
-        {person.location.coordinates.longitude}
-      </td>
-      <td>
-        {person.location.timezone.offset}
-        {person.location.timezone.description}
-      </td>
+      {Object.entries(personObj).map((dataEntry, idx) => (
+        <td style={{ border: "1px solid black" }} key={idx}>
+          {dataEntry[1]}
+        </td>
+      ))}
     </tr>
   ));
 
   let table = (
-    <table>
+    <table style={{ borderCollapse: "collapse" }}>
       <thead>
-        <tr>
-          <th>FirstName</th>
-          <th>LastName</th>
-          <th>Street</th>
-          <th>City</th>
-          <th>State</th>
-          <th>Country</th>
-          <th>PostCode</th>
-          <th>Coordinates</th>
-          <th>Timezone</th>
-        </tr>
-        {userList}
+        <tr>{headers}</tr>
+        {individualTableData}
       </thead>
     </table>
   );
-
   useEffect(() => {
-    grabData();
+    grabData()
+      .then((resultsArray) => {
+        flattenLocationHeaders(resultsArray);
+        return resultsArray;
+      })
+      .then((resultsArray) => {
+        getPeopleTableData(resultsArray);
+      });
   }, []);
 
   return (
     <div className="App">
       <h1>Hello CodeSandbox</h1>
       <h2>Start editing to see some magic happen!</h2>
-      {/* <pre style={{textAlign:"start"}}>
-        {stringData.current}
-      </pre> */}
+      {/* <pre style={{ textAlign: "start" }}>{stringData.current}</pre> */}
       {table}
     </div>
   );
