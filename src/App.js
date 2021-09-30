@@ -8,12 +8,39 @@ export default function App() {
   const [locationHeaders, setLocationHeaders] = useState([]);
   const stringData = useRef("");
 
+  //state for people data
+  const [peopleData, setPeopleData] = useState([]);
+
   async function grabData() {
     const response = await fetch("https://randomuser.me/api/?results=20");
     const rawData = await response.json();
     stringData.current = JSON.stringify(rawData, null, 2);
     // setResultsArray(rawData.results);
     return rawData.results;
+  }
+
+  function getPeopleTableData(resultsArray) {
+    //results array, each element is a person
+    //for each person we need tr, corresponding td
+    //store it in new state variable? then render new elements
+
+    let peopleData = [];
+    resultsArray.forEach((person) => {
+      const { street, coordinates, timezone, ...restOfKeys } = person.location;
+
+      peopleData.push({
+        PersonName: `${person.name.first} ${person.name.last}`,
+        number: street.number,
+        name: street.name,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        offset: timezone.offset,
+        description: timezone.description,
+        ...restOfKeys
+      });
+    });
+    setPeopleData(peopleData);
+    console.log(peopleData);
   }
 
   function flattenLocationHeaders(resultsArray) {
@@ -26,29 +53,48 @@ export default function App() {
     } = resultsArray[0].location;
 
     let headersArray = [
-      "street",
+      "PersonName",
       ...Object.keys(street),
-      "coordinates",
       ...Object.keys(coordinates),
-      "timezone",
       ...Object.keys(timezone),
       ...Object.keys(restOfKeys)
     ];
     setLocationHeaders(headersArray);
   }
 
-  let headers = locationHeaders.map((header, idx) => <th>{header}</th>);
+  let headers = locationHeaders.map((header, idx) => (
+    <th key={idx} style={{ border: "1px solid black" }}>
+      {header}
+    </th>
+  ));
+
+  let individualTableData = peopleData?.map((personObj, index) => (
+    <tr key={index}>
+      {Object.entries(personObj).map((dataEntry, idx) => (
+        <td style={{ border: "1px solid black" }} key={idx}>
+          {dataEntry[1]}
+        </td>
+      ))}
+    </tr>
+  ));
 
   let table = (
-    <table>
+    <table style={{ borderCollapse: "collapse" }}>
       <thead>
         <tr>{headers}</tr>
+        {individualTableData}
       </thead>
     </table>
   );
-
   useEffect(() => {
-    grabData().then((resultsArray) => flattenLocationHeaders(resultsArray));
+    grabData()
+      .then((resultsArray) => {
+        flattenLocationHeaders(resultsArray);
+        return resultsArray;
+      })
+      .then((resultsArray) => {
+        getPeopleTableData(resultsArray);
+      });
   }, []);
 
   return (
