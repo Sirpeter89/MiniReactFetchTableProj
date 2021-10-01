@@ -62,8 +62,29 @@ export default function App() {
     setLocationHeaders(headersArray);
   }
 
+  function ascendingOrder(e) {
+    let header = e.target.innerText;
+    let copyOfPeople = [...peopleData];
+
+    copyOfPeople.sort((a, b) => {
+      if (a[header] > b[header]) {
+        return 1;
+      }
+      if (a[header] < b[header]) {
+        return -1;
+      }
+      return 0;
+    });
+
+    setPeopleData(copyOfPeople);
+  }
+
   let headers = locationHeaders.map((header, idx) => (
-    <th key={idx} style={{ border: "1px solid black" }}>
+    <th
+      onClick={(e) => ascendingOrder(e)}
+      key={idx}
+      style={{ border: "1px solid black" }}
+    >
       {header}
     </th>
   ));
