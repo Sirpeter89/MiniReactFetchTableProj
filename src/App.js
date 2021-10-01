@@ -11,6 +11,9 @@ export default function App() {
   //state for people data
   const [peopleData, setPeopleData] = useState([]);
 
+  //useRef for sorting
+  let ascending = useRef(true);
+
   async function grabData() {
     const response = await fetch("https://randomuser.me/api/?results=20");
     const rawData = await response.json();
@@ -66,16 +69,28 @@ export default function App() {
     let header = e.target.innerText;
     let copyOfPeople = [...peopleData];
 
-    copyOfPeople.sort((a, b) => {
-      if (a[header] > b[header]) {
-        return 1;
-      }
-      if (a[header] < b[header]) {
-        return -1;
-      }
-      return 0;
-    });
-
+    if (ascending.current) {
+      copyOfPeople.sort((a, b) => {
+        if (a[header] > b[header]) {
+          return 1;
+        }
+        if (a[header] < b[header]) {
+          return -1;
+        }
+        return 0;
+      });
+    } else {
+      copyOfPeople.sort((a, b) => {
+        if (a[header] > b[header]) {
+          return -1;
+        }
+        if (a[header] < b[header]) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+    ascending.current = !ascending.current;
     setPeopleData(copyOfPeople);
   }
 
