@@ -70,9 +70,15 @@ export default function App() {
 
   let individualTableData = peopleData?.map((personObj, index) => (
     <tr key={index}>
-      {Object.entries(personObj).map((dataEntry, idx) => (
+      {/* {Object.entries(personObj).map((dataEntry, idx) => (
         <td style={{ border: "1px solid black" }} key={idx}>
           {dataEntry[1]}
+        </td>
+      ))} */}
+      {/* making this work for any order of personObj */}
+      {locationHeaders.map((header, idx) => (
+        <td key={idx} style={{ border: "1px solid black" }}>
+          {personObj[header]}
         </td>
       ))}
     </tr>
@@ -82,8 +88,8 @@ export default function App() {
     <table style={{ borderCollapse: "collapse" }}>
       <thead>
         <tr>{headers}</tr>
-        {individualTableData}
       </thead>
+      <tbody>{individualTableData}</tbody>
     </table>
   );
   useEffect(() => {
