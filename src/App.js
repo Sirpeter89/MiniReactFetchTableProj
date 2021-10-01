@@ -14,6 +14,9 @@ export default function App() {
   //useRef for sorting
   let ascending = useRef(true);
 
+  //const useRef for Searching
+  let search = useRef("");
+
   async function grabData() {
     const response = await fetch("https://randomuser.me/api/?results=20");
     const rawData = await response.json();
@@ -138,10 +141,20 @@ export default function App() {
       });
   }, []);
 
+  function searching(str) {
+    search.current = str;
+    console.log(search.current);
+    const results = peopleData.filter((personObj) =>
+      JSON.stringify(personObj).includes(search.current)
+    );
+    setPeopleData(results);
+  }
+
   return (
     <div className="App">
       <h1>Hello CodeSandbox</h1>
       <h2>Start editing to see some magic happen!</h2>
+      <input onChange={(e) => searching(e.target.value)}></input>
       {/* <pre style={{ textAlign: "start" }}>{stringData.current}</pre> */}
       {table}
     </div>
