@@ -70,9 +70,14 @@ export default function App() {
 
   let individualTableData = peopleData?.map((personObj, index) => (
     <tr key={index}>
-      {Object.entries(personObj).map((dataEntry, idx) => (
+      {/* {Object.entries(personObj).map((dataEntry, idx) => (
         <td style={{ border: "1px solid black" }} key={idx}>
           {dataEntry[1]}
+        </td>
+      ))} */}
+      {locationHeaders.map((header, idx) => (
+        <td style={{ border: "1px solid black" }} key={idx}>
+          {personObj[header]}
         </td>
       ))}
     </tr>
